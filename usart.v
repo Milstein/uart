@@ -10,7 +10,8 @@ module usart
 	input wire RxD,
 	output wire Rx_RDY,
 	input wire rdy_clr,						// Once data is read setting the wire to high acknowledges the data is read by CPU
-	output wire [7:0] DATA_OUT
+	output wire [7:0] DATA_OUT,
+	output wire n_INT
 );
 
 baud_rate_gen 
@@ -40,6 +41,7 @@ receiver
 		.rdy_clr(rdy_clr),
 		.clk_50m(CLK50M),
 		.clken(rxclk_en),
+		.parity_err(n_INT),
 		.data(DATA_OUT)
 	);
 	

@@ -10,11 +10,12 @@ module tb_usart;
 	reg tb_n_RST;
 	
 	// Outputs
-	wire tb_tx;
+	//wire tb_tx;
 	wire tb_Tx_RDY;
 	wire tb_Rx_RDY;
 	wire [7:0] tb_DATA_OUT;
 	wire loopback;
+	wire tb_n_INT;
 	
 	// Instantiate the Unit Under Test (UUT)
 	usart uut (
@@ -27,21 +28,21 @@ module tb_usart;
 		.Rx_RDY(tb_Rx_RDY), 
 		.rdy_clr(tb_rdy_clr),
 		.n_RST(tb_n_RST),
-		.DATA_OUT(tb_DATA_OUT)
+		.DATA_OUT(tb_DATA_OUT),
+		.n_INT(tb_n_INT)
 	);
 
 	initial begin
 		// Initialize Inputs
 		tb_rdy_clr = 0;
-		tb_DATA_IN = 8'b00000001;
+		tb_DATA_IN = 8'b00000000;
 		tb_n_WR= 1'b1;
 		tb_CLK50M= 0;
 		tb_n_RST = 0;
-
-		// Wait #2 ns for global reset to finish
+		
 		#2 tb_n_WR = 1'b0;
 		tb_n_RST = 1;
-
+ 
 	end
       
 	always begin

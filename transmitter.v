@@ -18,8 +18,8 @@ parameter STATE_START = 2'b01;
 parameter STATE_DATA  = 2'b10;
 parameter STATE_STOP  = 2'b11;
 
-reg [7:0] data = 8'h00;
-reg [2:0] bitpos = 3'h0;
+reg [8:0] data = 8'h00;					// Extra parity bit
+reg [3:0] bitpos = 3'h0;
 reg [1:0] state = STATE_IDLE;
 
 always @(posedge clk_50m) 
@@ -49,12 +49,15 @@ begin
 		begin
 			if (clken) 
 				begin
-					if (bitpos == 3'h7)
+					if (bitpos == 4'h8)
 						state <= STATE_STOP;
 					else
 						bitpos <= bitpos + 3'h1;
-						
+					
 					tx <= data[bitpos];
+					
+					if (bitpos < 8)
+						data[8] <= data[8] ^ data[bitpos];
 				end
 		end
 		

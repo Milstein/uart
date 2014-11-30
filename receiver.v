@@ -6,12 +6,14 @@ module receiver
 	input wire rdy_clr,
 	input wire clk_50m,
 	input wire clken,
-	output reg [7:0] data
+	output reg [7:0] data,
+	output reg parity_err
  );
  
  initial begin
 	rdy = 0;
 	data = 8'b0;
+	parity_err = 0;
  end
 
 parameter RX_STATE_START = 2'b00;
@@ -21,7 +23,7 @@ parameter RX_STATE_STOP  = 2'b10;
 reg [1:0] state = RX_STATE_START;
 reg [3:0] sample = 0;
 reg [3:0] bitpos = 0;
-reg [7:0] scratch = 8'b0;
+reg [8:0] scratch = 8'b0;
 
 always @(posedge rdy_clr)
 begin
@@ -30,9 +32,7 @@ end
 
 always @(posedge clk_50m)
 begin
-	//if (rdy_clr)
-	//	rdy <= 0;
-		
+
 	if (clken)
 		begin
 			case (state)
@@ -59,8 +59,14 @@ begin
 								bitpos <= bitpos + 4'b1;
 							end
 						
-						if (bitpos == 8 && sample == 14)
+						if (bitpos == 9 && sample == 14)
+						begin
 							state <= RX_STATE_STOP;
+							parity_err <= scratch[8] ^ scratch[7] ^ scratch[6] ^ scratch[5] 
+											^ scratch[4] ^ scratch[3] ^ scratch[2] ^ scratch[1] 
+											^ scratch[0];
+						end
+						
 					end
 				
 				RX_STATE_STOP:
@@ -68,7 +74,7 @@ begin
 						if (sample == 15 || (sample >= 8 && !rx))
 							begin
 								state <= RX_STATE_START;
-								data <= scratch;
+								data <= scratch[7:0];
 								rdy <= 1'b1;
 								sample <= 0;
 							end
